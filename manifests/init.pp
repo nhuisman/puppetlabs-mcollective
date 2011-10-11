@@ -52,45 +52,15 @@
 #   }
 # }
 #
-class mcollective(
-  $version              = 'UNSET',
-  $enterprise           = false,
-  $manage_packages      = true,
-  $manage_plugins       = false,
-  $server               = true,
-  $server_config        = 'UNSET',
-  $server_config_file   = '/etc/mcollective/server.cfg',
-  $client               = false,
-  $client_config        = 'UNSET',
-  $client_config_file   = '/etc/mcollective/client.cfg',
-  $stomp_server         = $mcollective::params::stomp_server,
-  $stomp_port           = '61613',
-  $mc_security_provider = $mcollective::params::mc_security_provider,
-  $mc_security_psk      = $mcollective::params::mc_security_psk,
-  $fact_source          = 'facter',
-  $yaml_facter_source   = '/etc/mcollective/facts.yaml'
-) inherits mcollective::params {
+class mcollective
+(
+  $config_data = hiera("mcollective")
+)
 
-  $v_bool = [ '^true$', '^false$' ]
-  validate_bool($manage_packages)
-  validate_bool($enterprise)
-  validate_bool($manage_plugins)
-  validate_re($server_config_file, '^/')
-  validate_re($client_config_file, '^/')
-  validate_re("$server", $v_bool)
-  validate_re("$client", $v_bool)
-  validate_re($version, '^[._0-9a-zA-Z:-]+$')
-  validate_re($mc_security_provider, '^[a-zA-Z0-9_]+$')
-  validate_re($mc_security_psk, '^[^ \t]+$')
-  validate_re($fact_source, '^facter$|^yaml$')
+  class { "mcollective::params": 
+    config_data => $config_data
+  }
 
-  $server_real               = $server
-  $client_real               = $client
-  $client_config_file_real   = $client_config_file
-  $server_config_file_real   = $server_config_file
-  $stomp_server_real         = $stomp_server
-  $mc_security_provider_real = $mc_security_provider
-  $mc_security_psk_real      = $mc_security_psk
 
   # Service Name:
   $service_name = $enterprise ? {
