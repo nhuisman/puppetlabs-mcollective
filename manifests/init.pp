@@ -52,38 +52,8 @@
 #   }
 # }
 #
-class mcollective
-(
-  $config_data = hiera("mcollective")
-)
-
-  class { "mcollective::params": 
-    config_data => $config_data
-  }
-
-
-  # Service Name:
-  $service_name = $enterprise ? {
-    true  => 'pe-mcollective',
-    false => 'mcollective',
-  }
-
-  if $version == 'UNSET' {
-      $version_real = 'present'
-  } else {
-      $version_real = $version
-  }
-
-  if $client_config == 'UNSET' {
-    $client_config_real = template('mcollective/client.cfg.erb')
-  } else {
-    $client_config_real = $client_config
-  }
-  if $server_config == 'UNSET' {
-    $server_config_real = template('mcollective/server.cfg.erb')
-  } else {
-    $server_config_real = $server_config
-  }
+class mcollective inherits mcollective::params
+{
 
   # Add anchor resources for containment
   anchor { 'mcollective::begin': }

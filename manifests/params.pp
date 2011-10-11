@@ -13,7 +13,7 @@
 #
 class mcollective::params 
 (
-  $config_data
+  $config_data = hiera("mcollective")
 )
 {
 
@@ -27,8 +27,6 @@ class mcollective::params
   $client               = $config_data['configs']['client']
   $client_config        = $config_data['configs']['client_config'] 
   $client_config_file   = $config_data['configs']['client_config_file']
-  $stomp_server         = $config_data['configs']['stomp_server']   
-  $stomp_port           = $config_data['configs']['stomp_port']    
   $mc_security_provider = $config_data['configs']['mc_security_provider']   
   $mc_security_psk      = $config_data['configs']['mc_security_psk']  
   $fact_source          = $config_data['configs']['fact_source'] 
@@ -39,11 +37,9 @@ class mcollective::params
   $mc_logfile           = $config_data['configs']['mc_logfile']  
   $mc_loglevel          = $config_data['configs']['mc_loglevel']
   $mc_daemonize         = $config_data['configs']['mc_daemonize']
-  $mc_security_provider = $config_data['configs']['mc_security_provider']
-  $mc_security_psk      = $config_data['configs']['mc_security_psk']  
   
   $plugin_base          = $config_data['configs']['plugin_base']
-  $plugin_subs 		= $config_data['configs']['plugin_subs'] 
+  $plugin_subs 	      	= $config_data['configs']['plugin_subs'] 
 
   $client_config_owner  = $config_data['configs']['client_config_owner'] 
   $client_config_group  = $config_data['configs']['client_config_group'] 
@@ -52,8 +48,8 @@ class mcollective::params
 
   $stomp_user           = $config_data['configs']['stomp_user'] 
   $stomp_passwd         = $config_data['configs']['stomp_passwd']
-  $stomp_server         = $config_data['configs']['stomp_server'] 
-  $stomp_port           = $config_data['configs']['stomp_port']
+  $stomp_server         = $config_data['configs']['stomp_server']   
+  $stomp_port           = $config_data['configs']['stomp_port']    
   $pkg_state            = $config_data['configs']['pkg_state']
 
   $server_real               = $server
@@ -88,17 +84,40 @@ class mcollective::params
 
   $mc_libdir = $operatingsystem ? {
     /(?i-mx:ubuntu|debian)/        => '/usr/share/mcollective/plugins',
-    /(?i-mx:centos|fedora|redhat)/ => '/usr/libexec/mcollective',
+    /(?i-mx:centos|fedora|redhat|sles)/ => '/usr/libexec/mcollective',
   }
 
   $mc_service_start = $operatingsystem ? {
     /(?i-mx:ubuntu|debian)/        => '/etc/init.d/mcollective start',
-    /(?i-mx:centos|fedora|redhat)/ => '/sbin/service mcollective start',
+    /(?i-mx:centos|fedora|redhat|sles)/ => '/sbin/service mcollective start',
   }
 
   $mc_service_stop = $operatingsystem ? {
     /(?i-mx:ubuntu|debian)/        => '/etc/init.d/mcollective stop',
-    /(?i-mx:centos|fedora|redhat)/ => '/sbin/service mcollective stop',
+    /(?i-mx:centos|fedora|redhat|sles)/ => '/sbin/service mcollective stop',
   }
+
+  $service_name = $enterprise ? {
+    true  => 'pe-mcollective',
+    false => 'mcollective',
+  }
+
+  if $version == 'UNSET' {
+      $version_real = 'present'
+  } else {
+      $version_real = $version
+  }
+
+  if $client_config == 'UNSET' {
+    $client_config_real = template('mcollective/client.cfg.erb')
+  } else {
+    $client_config_real = $client_config
+  }
+  if $server_config == 'UNSET' {
+    $server_config_real = template('mcollective/server.cfg.erb')
+  } else {
+    $server_config_real = $server_config
+  }
+
 
 }
